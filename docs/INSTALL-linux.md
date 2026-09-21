@@ -57,9 +57,43 @@ For a build without installing the module:
 nix build github:AprilNEA/OpenLogi#openlogi
 ```
 
+## AppImage
+
+Every release also ships an `.AppImage` for `x86_64` and `aarch64`. It needs
+no installation and no root: mark it executable and run it. The image
+contains all four executables; the first argument selects one, and the GUI
+runs when there is none:
+
+```sh
+chmod +x openlogi-*.AppImage
+./openlogi-*.AppImage                    # GUI
+./openlogi-*.AppImage openlogi list      # CLI
+./openlogi-*.AppImage openlogi-agent     # agent in the foreground
+```
+
+The GUI starts the agent from the same image, and the agent's
+launch-at-login setting writes a systemd user unit that runs the AppImage
+file itself, so keep the file where it is (or update the setting after
+moving it).
+
+What an AppImage cannot do is install the udev rules from the next section.
+Copy them out of the image once:
+
+```sh
+./openlogi-*.AppImage --appimage-extract etc/udev/rules.d/70-openlogi.rules
+sudo install -Dm644 squashfs-root/etc/udev/rules.d/70-openlogi.rules \
+  /etc/udev/rules.d/70-openlogi.rules
+rm -r squashfs-root
+sudo udevadm control --reload-rules && sudo udevadm trigger
+```
+
+The AppImage needs the same GLIBC 2.35 floor as the packages, plus the
+`libxkbcommon` and `libxcb` shared libraries every desktop already has; it
+bundles no system libraries.
+
 ## Build from source
 
-Pre-built `.deb` and `.rpm` packages are available on the
+Pre-built `.deb`, `.rpm`, and `.AppImage` files are available on the
 [releases page](https://github.com/AprilNEA/OpenLogi/releases/latest) — see
 the main [README](../README.md#linux) for the package-based install. To build
 from source instead, use the stable Rust toolchain:
