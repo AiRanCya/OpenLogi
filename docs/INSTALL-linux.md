@@ -87,9 +87,20 @@ rm -r squashfs-root
 sudo udevadm control --reload-rules && sudo udevadm trigger
 ```
 
-The AppImage needs the same GLIBC 2.35 floor as the packages, plus the
-`libxkbcommon` and `libxcb` shared libraries every desktop already has; it
-bundles no system libraries.
+The AppImage bundles no system libraries, so the host has to provide what
+the packages declare as dependencies. The GLIBC 2.35 floor is the same as for
+the packages. Beyond that:
+
+| Executable | Host requirements |
+|---|---|
+| `openlogi`, `openlogi-agent` | glibc only |
+| `openlogi-desktop`, `openlogi-overlay` | `libxkbcommon`, `libxkbcommon-x11`, `libxcb` (linked at start), plus a Wayland or X11 session, `libwayland-client`, EGL, and the Vulkan loader with a working GPU driver (loaded at runtime) |
+
+The two `libxkbcommon` libraries are the only ones an AppImage could carry
+itself; the rest belong to the display server, GPU driver, or font setup and
+have to come from the host. Any desktop that runs a Wayland or X11 session
+has all of them. On a headless or minimal install, the CLI and agent still
+run; the GUI reports which library it could not load.
 
 ## Build from source
 

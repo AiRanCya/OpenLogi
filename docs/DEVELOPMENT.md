@@ -371,6 +371,14 @@ appimagetool downloads the type2 runtime it embeds unless one is passed with
 the runtime by checksum in `build.yml`. Set `APPIMAGE_EXTRACT_AND_RUN=1` on a
 host without FUSE so appimagetool can run at all.
 
+The image bundles no shared libraries: the GUI's link-time needs are
+`libxkbcommon`, `libxkbcommon-x11`, and `libxcb`, and it loads Wayland, EGL,
+and the Vulkan loader by name at runtime. All but the two `libxkbcommon`
+libraries are on the AppImage community excludelist (driver, display server,
+and font libraries stay on the host), so bundling those two is the only
+self-containment step left, deliberately deferred. The host contract is
+documented in `docs/INSTALL-linux.md`.
+
 An AppImage cannot install the udev rules that grant device access; the
 bundled copy is at `etc/udev/rules.d/70-openlogi.rules` inside the image (see
 `docs/INSTALL-linux.md`), and the installation-source detection below reports
